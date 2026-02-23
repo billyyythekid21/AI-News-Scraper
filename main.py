@@ -13,7 +13,7 @@ def scrape_news():
     with no introduction or conclusion, just the news.
     Also include the sources of the news in the format of a dot-point list
      of website links with the full URL.
-    The news should be in the following format:
+    The news should be in the following general format:
     - News item 1
     - News item 2
     - News item 3
