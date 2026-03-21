@@ -1,6 +1,6 @@
 import google.genai as genai
-import os
-from twilio.rest import Client
+import urllib3
+from urllib.request import parse
 
 def scrape_news():
     genai.configure(api_key=os.getenv("GENAI_API_KEY"))
