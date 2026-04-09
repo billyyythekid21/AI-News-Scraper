@@ -23,5 +23,5 @@ def send_to_all():
 
 
 def start_scheduler():
-    scheduler.add_job(send_to_all, "cron", hour=8, minute=0)  # Daily at 8am
+    scheduler.add_job(send_to_all, "cron", hour=7, minute=30)  # Sends messages daily at 7:30am as a default setting
     scheduler.start()
