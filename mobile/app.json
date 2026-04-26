@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "6dd1b744-d1ee-4a97-9419-6e44ebc07040"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.billyyythekid21.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
+}

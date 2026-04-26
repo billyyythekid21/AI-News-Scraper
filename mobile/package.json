@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "expo": "^55.0.17",
+    "expo-dev-client": "~55.0.28",
+    "react": "19.2.0",
+    "react-native": "0.83.6"
+  },
+  "name": "mobile",
+  "version": "1.0.0",
+  "scripts": {}
+}
