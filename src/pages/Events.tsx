@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Calendar, Plus, Check } from 'lucide-react';
 
-// added rsvp_count and user_rsvpd to the interface
 interface Event {
 	id: string;
 	title: string;
@@ -126,9 +126,16 @@ function Events() {
 						showForm
 							? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
 							: 'bg-green-500 hover:bg-green-400 text-black'
-					}`}
+					} inline-flex items-center gap-1`}
 				>
-					{showForm ? 'Cancel' : '+ Post Event'}
+					{showForm ? (
+						'Cancel'
+					) : (
+						<>
+							<Plus className="w-4 h-4" />
+							Post Event
+						</>
+					)}
 				</button>
 			</div>
 
@@ -174,19 +181,20 @@ function Events() {
 							onChange={handleChange}
 							className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 transition"
 						/>
-						<button
-							type="submit"
-							className="bg-green-500 hover:bg-green-400 text-black rounded-lg px-4 py-3 text-sm font-medium transition"
-						>
-							Post Event
-						</button>
+					<button
+						type="submit"
+						className="bg-green-500 hover:bg-green-400 text-black rounded-lg px-4 py-3 text-sm font-medium transition inline-flex items-center justify-center gap-1"
+					>
+						<Plus className="w-4 h-4" />
+						Post Event
+					</button>
 					</form>
 				)}
 			</div>
 
 			{events.length === 0 && (
 				<div className="flex flex-col items-center justify-center py-24 text-center">
-					<div className="text-4xl mb-4">📅</div>
+					<Calendar className="w-10 h-10 mb-4 text-gray-500" />
 					<p className="text-gray-400 mb-2">No events yet.</p>
 					<p className="text-gray-600 text-sm">
 						Be the first to post one!
@@ -206,13 +214,14 @@ function Events() {
 							</h2>
 							<button
 								onClick={() => handleRsvp(event)}
-								className={`text-sm px-3 py-1 rounded-lg font-medium transition ml-4 shrink-0 ${
+								className={`text-sm px-3 py-1 rounded-lg font-medium transition ml-4 shrink-0 inline-flex items-center gap-1 ${
 									event.user_rsvpd
 										? 'bg-green-500/20 text-green-400 hover:bg-red-500/20 hover:text-red-400'
 										: 'bg-gray-800 text-gray-300 hover:bg-green-500/20 hover:text-green-400'
 								}`}
 							>
-								{event.user_rsvpd ? 'Going ✓' : 'RSVP'}
+								<Check className="w-4 h-4" />
+								{event.user_rsvpd ? 'Going' : 'RSVP'}
 							</button>
 						</div>
 

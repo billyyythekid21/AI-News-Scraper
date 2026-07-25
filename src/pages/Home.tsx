@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Users, Heart, Calendar, Search } from 'lucide-react';
 import { subscribeToPush } from '../api/push';
 
 interface User {
@@ -73,28 +74,28 @@ function Home() {
 						onClick={() => navigate('/match')}
 						className="bg-green-500 hover:bg-green-400 text-black font-semibold rounded-xl p-5 text-left transition"
 					>
-						<div className="text-2xl mb-2">👋</div>
+						<Users className="w-6 h-6 mb-2" />
 						<div>Find People</div>
 					</button>
 					<button
 						onClick={() => navigate('/matches')}
 						className="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-white font-semibold rounded-xl p-5 text-left transition"
 					>
-						<div className="text-2xl mb-2">💚</div>
+						<Heart className="w-6 h-6 mb-2" />
 						<div>Your Matches</div>
 					</button>
 					<button
 						onClick={() => navigate('/events')}
 						className="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-white font-semibold rounded-xl p-5 text-left transition"
 					>
-						<div className="text-2xl mb-2">📅</div>
+						<Calendar className="w-6 h-6 mb-2" />
 						<div>Events</div>
 					</button>
 					<button
 						onClick={() => navigate('/search')}
 						className="bg-gray-900 hover:bg-gray-800 border border-gray-800 text-white font-semibold rounded-xl p-5 text-left transition"
 					>
-						<div className="text-2xl mb-2">🔍</div>
+						<Search className="w-6 h-6 mb-2" />
 						<div>Search</div>
 					</button>
 				</div>

@@ -22,8 +22,9 @@ from app.auth import (
     create_access_token,
     get_current_user,
 )
-from app.ml.embeddings import embed_profile, embed_text
+from app.ml.embeddings import embed_profile, embed_text, blend_embeddings
 from app.ml.ranking import get_trained_model, rank_candidates
+from app.services.github import fetch_github_repos
 
 Base.metadata.create_all(bind=engine)
 
@@ -60,6 +61,12 @@ class UserProfileUpdate(BaseModel):
     course: str | None = None
     contact: str | None = None
     interests: str | None = None
+    github_username: str | None = None
+    instagram: str | None = None
+    facebook: str | None = None
+    website: str | None = None
+    contact_email: str | None = None
+    discord: str | None = None
 
 
 # ===== Schemas: Matches =====
@@ -143,6 +150,12 @@ def me(current_user: User = Depends(get_current_user)):
         "course": current_user.course,
         "contact": current_user.contact,
         "interests": current_user.interests,
+        "github_username": current_user.github_username,
+        "instagram": current_user.instagram,
+        "facebook": current_user.facebook,
+        "website": current_user.website,
+        "contact_email": current_user.contact_email,
+        "discord": current_user.discord,
     }
 
 
@@ -152,6 +165,7 @@ def update_profile(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    # save fields to current user
     if payload.bio:
         current_user.bio = payload.bio
     if payload.location:
@@ -162,12 +176,40 @@ def update_profile(
         current_user.contact = payload.contact
     if payload.interests:
         current_user.interests = payload.interests
+    if payload.github_username:
+        current_user.github_username = payload.github_username
+    if payload.instagram:
+        current_user.instagram = payload.instagram
+    if payload.facebook:
+        current_user.facebook = payload.facebook
+    if payload.website:
+        current_user.website = payload.website
+    if payload.contact_email:
+        current_user.contact_email = payload.contact_email
+    if payload.discord:
+        current_user.discord = payload.discord
 
-    current_user.embedding = embed_profile(
+    # embed profile from current user fields
+    profile_embedding = embed_profile(
         bio=current_user.bio or "",
         course=current_user.course or "",
         interests=current_user.interests or "",
     )
+
+    # handle github embedding
+    if current_user.github_username:
+        github_text = fetch_github_repos(current_user.github_username)
+        if github_text:
+            github_embedding = embed_text(github_text)
+            current_user.embedding = blend_embeddings(profile_embedding, github_embedding)
+            current_user.github_embedding = github_embedding
+        else:
+            # github failed, use profile embedding
+            current_user.embedding = profile_embedding
+            current_user.github_embedding = None
+    else:
+        # no github, just use profile embedding
+        current_user.embedding = profile_embedding
 
     db.commit()
     db.refresh(current_user)
@@ -275,6 +317,12 @@ def get_matches(
             "course": candidate.course,
             "contact": candidate.contact,
             "interests": candidate.interests,
+            "github_username": candidate.github_username,
+            "instagram": candidate.instagram,
+            "facebook": candidate.facebook,
+            "website": candidate.website,
+            "contact_email": candidate.contact_email,
+            "discord": candidate.discord,
         }
         for candidate, score in ranked[:20]
     ]
@@ -389,6 +437,12 @@ def get_mutual_matches(
             "interests": u.interests,
             "location": u.location,
             "contact": u.contact,
+            "github_username": u.github_username,
+            "instagram": u.instagram,
+            "facebook": u.facebook,
+            "website": u.website,
+            "contact_email": u.contact_email,
+            "discord": u.discord,
         }
         for u in users
     ]

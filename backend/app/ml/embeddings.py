@@ -1,3 +1,4 @@
+import numpy as np
 from functools import lru_cache
 
 from sentence_transformers import SentenceTransformer
@@ -21,3 +22,12 @@ def embed_profile(bio: str, course: str, interests: str) -> list[float]:
         parts.append(bio)
     text = " ".join(parts) if parts else "No profile yet."
     return embed_text(text)
+
+def blend_embeddings(a, b, alpha: float = 0.75) -> list[float]:
+    if a is None:
+        return b
+    if b is None:
+        return a
+    result = (np.array(a) * alpha + np.array(b) * (1 - alpha))
+    result = result / np.linalg.norm(result)
+    return result.tolist()   

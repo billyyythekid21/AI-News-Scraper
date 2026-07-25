@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Search as SearchIcon, ArrowLeft } from 'lucide-react';
 
 interface UserResult {
 	id: string;
@@ -82,9 +83,16 @@ function Search() {
 					/>
 					<button
 						type="submit"
-						className="bg-green-500 hover:bg-green-400 text-black font-semibold px-5 py-3 rounded-lg transition"
+						className="bg-green-500 hover:bg-green-400 text-black font-semibold px-5 py-3 rounded-lg transition inline-flex items-center gap-2"
 					>
-						{loading ? '...' : 'Search'}
+						{loading ? (
+							'...'
+						) : (
+							<>
+								<SearchIcon className="w-4 h-4" />
+								Search
+							</>
+						)}
 					</button>
 				</form>
 
@@ -204,9 +212,10 @@ function Search() {
 
 				<button
 					onClick={() => navigate('/')}
-					className="mt-10 text-black-500 hover:text-white text-sm transition"
+					className="mt-10 text-black-500 hover:text-white text-sm transition inline-flex items-center gap-1"
 				>
-					← Home
+					<ArrowLeft className="w-4 h-4" />
+					Home
 				</button>
 			</div>
 		</div>

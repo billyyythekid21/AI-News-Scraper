@@ -50,6 +50,13 @@ BIO_TEMPLATES = [
     "Looking for study buddies and maybe a {i1} partner.",
 ]
 
+# Well-known GitHub accounts so the GitHub UI has something
+# to point at without needing to hit the GitHub API for every seed user.
+GITHUB_USERNAMES = [
+    "torvalds", "gaearon", "sindresorhus", "yyx990803", "tj",
+    "addyosmani", "kentcdodds", "ry", "antirez", "mitchellh",
+]
+
 
 def random_user(existing_usernames: set[str], existing_emails: set[str]) -> User:
     first = random.choice(FIRST_NAMES)
@@ -83,6 +90,12 @@ def random_user(existing_usernames: set[str], existing_emails: set[str]) -> User
         contact=contact,
         interests=", ".join(interests),
         embedding=embed_profile(bio=bio, course=course, interests=", ".join(interests)),
+        github_username=random.choice(GITHUB_USERNAMES),
+        instagram=f"https://instagram.com/{username.lower()}",
+        facebook=f"https://facebook.com/{username.lower()}",
+        website=f"https://{username.lower()}.dev",
+        contact_email=email,
+        discord=username.lower(),
     )
 
 

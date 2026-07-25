@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Leaf, Heart, X, ArrowLeft, Code2 } from 'lucide-react';
 
 interface MatchUser {
 	id: string;
@@ -10,6 +11,7 @@ interface MatchUser {
 	interests: string;
 	location: string;
 	contact: string;
+	github_username: string;
 }
 
 function Match() {
@@ -93,7 +95,7 @@ function Match() {
 		);
 
 		if (res.data.is_mutual) {
-			alert(`You and ${user.username} both liked each other!`);
+			alert(`You and ${user.username} both liked each other! You can now see each other's social links.`);
 		}
 
 		setIndex((i) => i + 1);
@@ -133,7 +135,7 @@ function Match() {
 					</button>
 				</div>
 				<div className="flex flex-col items-center justify-center h-[80vh] text-center px-6">
-					<div className="text-4xl mb-4">🌿</div>
+					<Leaf className="w-10 h-10 mb-4 text-green-500" />
 					<h2 className="text-white text-xl font-semibold mb-2">
 						You're all caught up!
 					</h2>
@@ -142,9 +144,10 @@ function Match() {
 					</p>
 					<button
 						onClick={() => navigate('/')}
-						className="text-black-500 hover:underline text-sm"
+						className="text-black-500 hover:underline text-sm inline-flex items-center gap-1"
 					>
-						← Back to home
+						<ArrowLeft className="w-4 h-4" />
+						Back to home
 					</button>
 				</div>
 			</div>
@@ -233,20 +236,33 @@ function Match() {
 								</span>
 							</div>
 						)}
+						{user.github_username && (
+							<a
+								href={`https://github.com/${user.github_username}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="flex items-center gap-2 text-sm mt-2 pt-3 border-t border-gray-800 text-gray-400 hover:text-green-400 transition w-fit"
+							>
+								<Code2 className="w-4 h-4" />
+								{user.github_username}
+							</a>
+						)}
 					</div>
 				</div>
 
 				<div className="flex gap-3">
 					<button
 						onClick={() => handleAction('pass')}
-						className="flex-1 bg-gray-900 hover:bg-gray-800 border border-gray-800 text-white font-semibold rounded-xl py-4 transition"
+						className="flex-1 bg-gray-900 hover:bg-gray-800 border border-gray-800 text-white font-semibold rounded-xl py-4 transition inline-flex items-center justify-center gap-2"
 					>
+						<X className="w-5 h-5" />
 						Pass
 					</button>
 					<button
 						onClick={() => handleAction('like')}
-						className="flex-1 bg-green-500 hover:bg-green-400 text-black font-semibold rounded-xl py-4 transition"
+						className="flex-1 bg-green-500 hover:bg-green-400 text-black font-semibold rounded-xl py-4 transition inline-flex items-center justify-center gap-2"
 					>
+						<Heart className="w-5 h-5" />
 						Like
 					</button>
 				</div>
