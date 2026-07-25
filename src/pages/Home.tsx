@@ -64,7 +64,7 @@ function Home() {
 						Hi, {user.username}!
 					</h1>
 					{user.course && (
-						<p className="text-gray-500 mt-1">{user.course}</p>
+						<p className="text-gray-500 mt-1">Studying: {user.course}</p>
 					)}
 				</div>
 
