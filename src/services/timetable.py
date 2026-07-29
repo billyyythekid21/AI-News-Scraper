@@ -2,7 +2,7 @@
 import icalendar
 from datetime import datetime
 
-from app.models.availability import TimeBlock
+from app.models.availability import Availability, TimeBlock
 
 HOUR_TO_BLOCK = {
     0: TimeBlock.twelve_am,
@@ -43,4 +43,19 @@ def extract_event_dates(component: icalendar.Event):
 def hour_to_block(hour: int) -> str | None:
     return HOUR_TO_BLOCK.get(hour)
 
+def find_availability(calendar: icalendar.Calendar) -> set[TimeBlock]:
+    availability = set()
+    for component in calendar.walk():
+        if component.name == "VEVENT":
+            start, end = extract_event_dates(component)
+            occupied_blocks = find_occupied_blocks(start, end)
+            availability.update(occupied_blocks)
+    return availability
+
 def find_occupied_blocks(start: datetime, end: datetime) -> list[TimeBlock]:
+    occupied_blocks = []
+    for hour in range(start.hour, end.hour):
+        hour_block = hour_to_block(hour)
+        if hour_block is not None:
+            occupied_blocks.append(hour_block)
+    return occupied_blocks
