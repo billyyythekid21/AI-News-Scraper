@@ -23,3 +23,12 @@ class TimeBlock(str, enum.Enum):
     nine_pm = "9pm"
     ten_pm = "10pm"
     eleven_pm = "11pm"
+
+class DayOfWeek(str, enum.Enum):
+    monday = "monday"
+    tuesday = "tuesday"
+    wednesday = "wednesday"
+    thursday = "thursday"
+    friday = "friday"
+    saturday = "saturday"
+    sunday = "sunday"
