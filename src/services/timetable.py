@@ -2,7 +2,7 @@
 import icalendar
 from datetime import datetime
 
-from app.models.availability import Availability, TimeBlock
+from app.models.availability import Availability, DayOfWeek, TimeBlock
 
 HOUR_TO_BLOCK = {
     0: TimeBlock.twelve_am,
@@ -31,6 +31,16 @@ HOUR_TO_BLOCK = {
     23: TimeBlock.eleven_pm,
 }
 
+WEEKDAY_TO_DAY = {
+    0: DayOfWeek.monday,
+    1: DayOfWeek.tuesday,
+    2: DayOfWeek.wednesday,
+    3: DayOfWeek.thursday,
+    4: DayOfWeek.friday,
+    5: DayOfWeek.saturday,
+    6: DayOfWeek.sunday,
+}
+
 def parse_ical(data: bytes):
     calendar = icalendar.Calendar.from_ical(data)
     return calendar
@@ -45,17 +55,33 @@ def hour_to_block(hour: int) -> str | None:
 
 def find_availability(calendar: icalendar.Calendar) -> set[TimeBlock]:
     availability = set()
+
     for component in calendar.walk():
+
         if component.name == "VEVENT":
             start, end = extract_event_dates(component)
-            occupied_blocks = find_occupied_blocks(start, end)
-            availability.update(occupied_blocks)
+
+            if isinstance(start, datetime):
+                day = start.weekday()
+                occupied_blocks = find_occupied_blocks(day, start, end)
+                availability.update(occupied_blocks)
+
     return availability
 
-def find_occupied_blocks(start: datetime, end: datetime) -> list[TimeBlock]:
-    occupied_blocks = []
+def find_occupied_blocks(day: int, start: datetime, end: datetime) -> list[tuple[DayOfWeek, TimeBlock | str]]:
+    occupied_blocks: list[tuple[DayOfWeek, TimeBlock]] = []
+    day_enum = WEEKDAY_TO_DAY.get(day)
+
+    if day_enum is None:
+        return []
+
     for hour in range(start.hour, end.hour):
         hour_block = hour_to_block(hour)
         if hour_block is not None:
-            occupied_blocks.append(hour_block)
+            occupied_blocks.append((day_enum, hour_block))
+
     return occupied_blocks
+
+def find_available_blocks(availability: set[tuple[DayOfWeek, TimeBlock]]) -> set[tuple[DayOfWeek, TimeBlock] | str | None]:
+    all_slots: set[tuple[DayOfWeek, TimeBlock] | str | None] = {(day, block) for day in DayOfWeek for block in TimeBlock}
+    return all_slots - set(availability)
