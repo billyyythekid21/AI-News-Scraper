@@ -816,3 +816,52 @@ async def get_availability(
         ))
     db.commit()
     return {"slots_saved": len(free_blocks)}
+
+# ===== Event Management =====
+@app.delete("/events/{event_id}")
+def delete_event(
+    event_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+
+    if not event:
+        raise HTTPException(status_code=404, detail="ERROR: Event not found")
+
+    if event.organizer_id != str(current_user.id):
+        raise HTTPException(status_code=403, detail="ERROR: You are not the organiser of this event")
+
+    db.delete(event)
+    event.is_deleted = True
+    db.commit()
+    return {"status": "ok"}
+
+@app.patch("/events/{event_id}")
+def update_event(
+    payload: EventUpdate,
+    event_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+
+    if not event:
+        raise HTTPException(status_code=404, detail="ERROR: Event not found")
+
+    if event.organizer_id != str(current_user.id):
+        raise HTTPException(status_code=403, detail="ERROR: You are not the organiser of this event")
+
+    if payload.title:
+        event.title = payload.title
+    if payload.description:
+        event.description = payload.description
+    if payload.location:
+        event.location = payload.location
+    if payload.starts_at:
+        event.starts_at = payload.starts_at
+    if payload.tags:
+        event.tags = payload.tags
+
+    db.commit()
+    return {"status": "ok"}
