@@ -876,3 +876,14 @@ def update_event(
 
     db.commit()
     return {"status": "ok"}
+
+@app.get("/events")
+def get_events(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 10,
+):
+    total = db.query(Event).filter(Event.is_deleted == False).filter(Event.starts_at >= datetime.utcnow()).count()
+
+    return {"events": [...], "total": total}
