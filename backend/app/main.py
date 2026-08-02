@@ -877,6 +877,7 @@ def update_event(
     db.commit()
     return {"status": "ok"}
 
+# ===== Event List =====
 @app.get("/events")
 def get_events(
     db: Session = Depends(get_db),
