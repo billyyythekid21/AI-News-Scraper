@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 import anthropic
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pywebpush import webpush, WebPushException
 from pydantic import BaseModel
@@ -16,6 +16,7 @@ from app.models.match import MatchRecord
 from app.models.event import Event
 from app.models.push_subscription import PushSubscription
 from app.models.rsvp import RSVP
+from app.models.availability import Availability
 from app.auth import (
     hash_password,
     verify_password,
@@ -25,6 +26,7 @@ from app.auth import (
 from app.ml.embeddings import embed_profile, embed_text, blend_embeddings
 from app.ml.ranking import get_trained_model, rank_candidates
 from app.services.github import fetch_github_repos
+from app.services.timetable import parse_ical, find_availability, find_available_blocks
 
 Base.metadata.create_all(bind=engine)
 
@@ -788,3 +790,29 @@ def send_push_notification(db: Session, user_id: str, title: str, body: str):
             # subscription expired, clean it up
             db.delete(sub)
             db.commit()
+
+# ===== Timetable Availability =====
+@app.post("/me/timetable")
+async def get_availability(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    file = await file.read()
+    calendar = parse_ical(file)
+    occupied = find_availability(calendar)
+    free_blocks = find_available_blocks(occupied)
+
+    # delete user's existing availability and insert new free blocks
+    db.query(Availability).filter(
+        Availability.user_id == str(current_user.id)
+    ).delete()
+
+    for day, block in free_blocks:
+        db.add(Availability(
+            user_id=str(current_user.id),
+            day=day,
+            block=block,
+        ))
+    db.commit()
+    return {"slots_saved": len(free_blocks)}
