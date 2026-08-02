@@ -1,3 +1,14 @@
+import enum
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import UUID
+
+from app.db.session import Base
+
+
 class TimeBlock(str, enum.Enum):
     twelve_am = "12am"
     one_am = "1am"
@@ -32,3 +43,13 @@ class DayOfWeek(str, enum.Enum):
     friday = "friday"
     saturday = "saturday"
     sunday = "sunday"
+
+
+class Availability(Base):
+    __tablename__ = "availabilities"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String, nullable=False)
+    day = Column(SAEnum(DayOfWeek), nullable=False)
+    block = Column(SAEnum(TimeBlock), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
