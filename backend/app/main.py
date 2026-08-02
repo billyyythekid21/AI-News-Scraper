@@ -70,6 +70,13 @@ class UserProfileUpdate(BaseModel):
     contact_email: str | None = None
     discord: str | None = None
 
+class EventUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    location: str | None = None
+    starts_at: datetime | None = None
+    tags: str | None = None
+
 
 # ===== Schemas: Matches =====
 
@@ -832,7 +839,6 @@ def delete_event(
     if event.organizer_id != str(current_user.id):
         raise HTTPException(status_code=403, detail="ERROR: You are not the organiser of this event")
 
-    db.delete(event)
     event.is_deleted = True
     db.commit()
     return {"status": "ok"}
@@ -862,6 +868,11 @@ def update_event(
         event.starts_at = payload.starts_at
     if payload.tags:
         event.tags = payload.tags
+
+    if payload.title or payload.description or payload.tags:
+        event.embedding = embed_text(
+        f"{event.title} {event.description} {event.location} {event.tags}"
+        )
 
     db.commit()
     return {"status": "ok"}
