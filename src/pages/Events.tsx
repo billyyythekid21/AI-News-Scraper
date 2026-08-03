@@ -20,6 +20,9 @@ function Events() {
 	const [events, setEvents] = useState<Event[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [showForm, setShowForm] = useState(false);
+	const [page, setPage] = useState(0);
+	const [total, setTotal] = useState(0);
+	const limit = 10;
 	const [form, setForm] = useState({
 		title: '',
 		description: '',
@@ -36,12 +39,13 @@ function Events() {
 		});
 		const myUsername = meRes.data.username;
 
-		const res = await axios.get('http://localhost:8000/events', {
+		const res = await axios.get(`http://localhost:8000/events?skip=${page * limit}&limit=${limit}`, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
+		setTotal(res.data.total);
 
 		const eventsWithRsvp = await Promise.all(
-			res.data.map(async (event: Event) => {
+			res.data.events.map(async (event: Event) => {
 				const rsvpRes = await axios.get(
 					`http://localhost:8000/events/${event.id}/rsvps`,
 					{ headers: { Authorization: `Bearer ${token}` } },
@@ -67,7 +71,7 @@ function Events() {
 			return;
 		}
 		fetchEvents();
-	}, []);
+	}, [page]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -267,6 +271,24 @@ function Events() {
 						</div>
 					</div>
 				))}
+
+				<div className="flex gap-4 mt-6 items-center">
+					<button
+						onClick={() => setPage(p => p - 1)}
+						disabled={page === 0}
+						className="text-gray-500 hover:text-white text-sm transition disabled:opacity-30"
+					>
+						← Previous
+					</button>
+					<span className="text-gray-500 text-sm">{page + 1} of {Math.ceil(total / limit)}</span>
+					<button
+						onClick={() => setPage(p => p + 1)}
+						disabled={(page + 1) * limit >= total}
+						className="text-gray-500 hover:text-white text-sm transition disabled:opacity-30"
+					>
+						Next →
+					</button>
+				</div>
 			</div>
 		</div>
 	);
