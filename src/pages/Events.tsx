@@ -30,7 +30,15 @@ function Events() {
 		starts_at: '',
 		tags: '',
 	});
-
+	const [editingEventId, setEditingEventId] = useState<string | null>(null);
+	const [editForm, setEditForm] = useState({
+		title: '',
+		description: '',
+		location: '',
+		starts_at: '',
+		tags: '',
+	});
+	
 	const token = localStorage.getItem('token');
 
 	const fetchEvents = async () => {
@@ -63,6 +71,7 @@ function Events() {
 
 		setEvents(eventsWithRsvp);
 		setLoading(false);
+		setMyUsername(meRes.data.username);
 	};
 
 	useEffect(() => {
