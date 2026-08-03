@@ -887,4 +887,31 @@ def get_events(
 ):
     total = db.query(Event).filter(Event.is_deleted == False).filter(Event.starts_at >= datetime.utcnow()).count()
 
-    return {"events": [...], "total": total}
+    query = (
+        db.query(Event)
+        .filter(Event.is_deleted == False)
+        .filter(Event.starts_at >= datetime.utcnow())
+    )
+
+    if current_user.embedding is not None:
+        query = query.order_by(Event.embedding.cosine_distance(current_user.embedding))
+    else:
+        query = query.order_by(Event.starts_at.asc())
+
+    events = query.offset(skip).limit(limit).all()
+
+    return {
+        "events": [
+            {
+                "id": str(e.id),
+                "title": e.title,
+                "description": e.description,
+                "location": e.location,
+                "starts_at": e.starts_at.isoformat(),
+                "tags": e.tags,
+                "organizer": e.organizer_username,
+            }
+            for e in events
+        ],
+        "total": total
+    }
