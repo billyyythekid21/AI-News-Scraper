@@ -546,40 +546,6 @@ def create_event(
     return {"id": str(event.id), "title": event.title}
 
 
-@app.get("/events")
-def get_events(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    if current_user.embedding is None:
-        events = (
-            db.query(Event)
-            .filter(Event.is_deleted == False)
-            .order_by(Event.starts_at.asc())
-            .all()
-        )
-    else:
-        events = (
-            db.query(Event)
-            .filter(Event.is_deleted == False)
-            .order_by(Event.embedding.cosine_distance(current_user.embedding))
-            .all()
-        )
-
-    return [
-        {
-            "id": str(e.id),
-            "title": e.title,
-            "description": e.description,
-            "location": e.location,
-            "starts_at": e.starts_at.isoformat(),
-            "tags": e.tags,
-            "organizer": e.organizer_username,
-        }
-        for e in events
-    ]
-
-
 # ===== RSVPs =====
 
 
