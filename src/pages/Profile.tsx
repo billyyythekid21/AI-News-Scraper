@@ -45,6 +45,7 @@ function Profile() {
 		discord: '',
 	});
 	const [saved, setSaved] = useState<boolean>(false);
+	const [timetableStatus, setTimetableStatus] = useState<string | null>(null);
 
 	const token = localStorage.getItem('token');
 
@@ -114,6 +115,26 @@ function Profile() {
 		setTimeout(() => {
 			setSaved(false);
 		}, 2000);
+	};
+
+	const handleTimetableUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		const formData = new FormData()
+		formData.append('file', file);
+
+		try {
+			const res = await axios.post('http://localhost:8000/me/timetable', formData, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'multipart/form-data',
+				}
+			});
+			setTimetableStatus(`${res.data.slots_saved} free slots imported.`);
+		} catch (err) {
+			setTimetableStatus("Import failed. Calendar must be a valid .ics file.");
+		}
 	};
 
 	if (!profile)
@@ -212,6 +233,18 @@ function Profile() {
 						</p>
 					</div>
 
+					<div className="flex flex-col gap-1">
+						<label className="text-gray-400 text-sm">Timetable</label>
+						<input
+							type="file"
+							accept=".ics"
+							onChange={handleTimetableUpload}
+							className="text-gray-400 text-sm"
+						/>
+						{timetableStatus && <p className="text-green-400 text-xs mt-1">{timetableStatus}</p>}
+						<p className="text-gray-600 text-xs">Upload your .ics timetable to auto-fill your free calendar blocks.</p>
+					</div>
+
 					<h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mt-2">
 						Links
 					</h2>
@@ -307,7 +340,7 @@ function Profile() {
 
 					<button
 						type="submit"
-						className="bg-green-500 hover:bg-green-400 text-black hover:text-white font-semibold rounded-lg py-3 transition mt-2"
+						className="bg-green-500 hover:bg-green-400 text-black font-semibold rounded-lg py-3 transition mt-2"
 					>
 						{saved ? 'Saved!' : 'Save Profile'}
 					</button>

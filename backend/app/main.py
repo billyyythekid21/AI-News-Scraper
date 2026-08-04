@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 
 import anthropic
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pywebpush import webpush, WebPushException
 from pydantic import BaseModel
@@ -16,6 +16,7 @@ from app.models.match import MatchRecord
 from app.models.event import Event
 from app.models.push_subscription import PushSubscription
 from app.models.rsvp import RSVP
+from app.models.availability import Availability
 from app.auth import (
     hash_password,
     verify_password,
@@ -25,6 +26,7 @@ from app.auth import (
 from app.ml.embeddings import embed_profile, embed_text, blend_embeddings
 from app.ml.ranking import get_trained_model, rank_candidates
 from app.services.github import fetch_github_repos
+from app.services.timetable import parse_ical, find_availability, find_available_blocks
 
 Base.metadata.create_all(bind=engine)
 
@@ -67,6 +69,13 @@ class UserProfileUpdate(BaseModel):
     website: str | None = None
     contact_email: str | None = None
     discord: str | None = None
+
+class EventUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    location: str | None = None
+    starts_at: datetime | None = None
+    tags: str | None = None
 
 
 # ===== Schemas: Matches =====
@@ -537,40 +546,6 @@ def create_event(
     return {"id": str(event.id), "title": event.title}
 
 
-@app.get("/events")
-def get_events(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    if current_user.embedding is None:
-        events = (
-            db.query(Event)
-            .filter(Event.is_deleted == False)
-            .order_by(Event.starts_at.asc())
-            .all()
-        )
-    else:
-        events = (
-            db.query(Event)
-            .filter(Event.is_deleted == False)
-            .order_by(Event.embedding.cosine_distance(current_user.embedding))
-            .all()
-        )
-
-    return [
-        {
-            "id": str(e.id),
-            "title": e.title,
-            "description": e.description,
-            "location": e.location,
-            "starts_at": e.starts_at.isoformat(),
-            "tags": e.tags,
-            "organizer": e.organizer_username,
-        }
-        for e in events
-    ]
-
-
 # ===== RSVPs =====
 
 
@@ -788,3 +763,121 @@ def send_push_notification(db: Session, user_id: str, title: str, body: str):
             # subscription expired, clean it up
             db.delete(sub)
             db.commit()
+
+# ===== Timetable Availability =====
+@app.post("/me/timetable")
+async def get_availability(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    file = await file.read()
+    calendar = parse_ical(file)
+    occupied = find_availability(calendar)
+    free_blocks = find_available_blocks(occupied)
+
+    # delete user's existing availability and insert new free blocks
+    db.query(Availability).filter(
+        Availability.user_id == str(current_user.id)
+    ).delete()
+
+    for day, block in free_blocks:
+        db.add(Availability(
+            user_id=str(current_user.id),
+            day=day,
+            block=block,
+        ))
+    db.commit()
+    return {"slots_saved": len(free_blocks)}
+
+# ===== Event Management =====
+@app.delete("/events/{event_id}")
+def delete_event(
+    event_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+
+    if not event:
+        raise HTTPException(status_code=404, detail="ERROR: Event not found")
+
+    if event.organizer_id != str(current_user.id):
+        raise HTTPException(status_code=403, detail="ERROR: You are not the organiser of this event")
+
+    event.is_deleted = True
+    db.commit()
+    return {"status": "ok"}
+
+@app.patch("/events/{event_id}")
+def update_event(
+    payload: EventUpdate,
+    event_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+
+    if not event:
+        raise HTTPException(status_code=404, detail="ERROR: Event not found")
+
+    if event.organizer_id != str(current_user.id):
+        raise HTTPException(status_code=403, detail="ERROR: You are not the organiser of this event")
+
+    if payload.title:
+        event.title = payload.title
+    if payload.description:
+        event.description = payload.description
+    if payload.location:
+        event.location = payload.location
+    if payload.starts_at:
+        event.starts_at = payload.starts_at
+    if payload.tags:
+        event.tags = payload.tags
+
+    if payload.title or payload.description or payload.tags:
+        event.embedding = embed_text(
+        f"{event.title} {event.description} {event.location} {event.tags}"
+        )
+
+    db.commit()
+    return {"status": "ok"}
+
+# ===== Event List =====
+@app.get("/events")
+def get_events(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    skip: int = 0,
+    limit: int = 10,
+):
+    total = db.query(Event).filter(Event.is_deleted == False).filter(Event.starts_at >= datetime.utcnow()).count()
+
+    query = (
+        db.query(Event)
+        .filter(Event.is_deleted == False)
+        .filter(Event.starts_at >= datetime.utcnow())
+    )
+
+    if current_user.embedding is not None:
+        query = query.order_by(Event.embedding.cosine_distance(current_user.embedding))
+    else:
+        query = query.order_by(Event.starts_at.asc())
+
+    events = query.offset(skip).limit(limit).all()
+
+    return {
+        "events": [
+            {
+                "id": str(e.id),
+                "title": e.title,
+                "description": e.description,
+                "location": e.location,
+                "starts_at": e.starts_at.isoformat(),
+                "tags": e.tags,
+                "organizer": e.organizer_username,
+            }
+            for e in events
+        ],
+        "total": total
+    }

@@ -1,0 +1,54 @@
+import enum
+import uuid
+from datetime import datetime
+
+from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import UUID
+
+from app.db.session import Base
+
+class TimeBlock(str, enum.Enum):
+    twelve_am = "12am"
+    one_am = "1am"
+    two_am = "2am"
+    three_am = "3am"
+    four_am = "4am"
+    five_am = "5am"
+    six_am = "6am"
+    seven_am = "7am"
+    eight_am = "8am"
+    nine_am = "9am"
+    ten_am = "10am"
+    eleven_am = "11am"
+    twelve_pm = "12pm"
+    one_pm = "1pm"
+    two_pm = "2pm"
+    three_pm = "3pm"
+    four_pm = "4pm"
+    five_pm = "5pm"
+    six_pm = "6pm"
+    seven_pm = "7pm"
+    eight_pm = "8pm"
+    nine_pm = "9pm"
+    ten_pm = "10pm"
+    eleven_pm = "11pm"
+
+class DayOfWeek(str, enum.Enum):
+    monday = "monday"
+    tuesday = "tuesday"
+    wednesday = "wednesday"
+    thursday = "thursday"
+    friday = "friday"
+    saturday = "saturday"
+    sunday = "sunday"
+
+
+class Availability(Base):
+    __tablename__ = "availabilities"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String, nullable=False)
+    day = Column(SAEnum(DayOfWeek), nullable=False)
+    block = Column(SAEnum(TimeBlock), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
