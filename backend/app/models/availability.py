@@ -8,7 +8,6 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.session import Base
 
-
 class TimeBlock(str, enum.Enum):
     twelve_am = "12am"
     one_am = "1am"
