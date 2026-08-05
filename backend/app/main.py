@@ -2,13 +2,21 @@ import json
 import os
 import uuid
 from datetime import datetime
+from pathlib import Path
 
-import anthropic
+from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from google import genai
 from pywebpush import webpush, WebPushException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+# Load .env from project root (and backend/) so uvicorn works from either cwd
+_BACKEND_DIR = Path(__file__).resolve().parent.parent
+_ROOT_DIR = _BACKEND_DIR.parent
+load_dotenv(_ROOT_DIR / ".env")
+load_dotenv(_BACKEND_DIR / ".env")
 
 from app.db.session import Base, engine, get_db
 from app.models.user import User
@@ -43,9 +51,13 @@ VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY")
 VAPID_PUBLIC_KEY = os.getenv("VAPID_PUBLIC_KEY")
 VAPID_CLAIMS = {"sub": "mailto:your@email.com"}
 
+# Loads Google API key from environment variable
+_google_api_key = os.getenv("GOOGLE_API_KEY")
+if not _google_api_key:
+    print("WARNING: GOOGLE_API_KEY is not set — icebreakers will fail")
+client = genai.Client(api_key=_google_api_key)
+
 # ===== Schemas: Users =====
-
-
 class UserCreate(BaseModel):
     username: str
     email: str
@@ -679,10 +691,6 @@ def get_icebreaker(
     if not i_liked_them or not they_liked_me:
         raise HTTPException(status_code=403, detail="Not a mutual match")
 
-    client = anthropic.Anthropic(
-        api_key=os.getenv("ANTHROPIC_API_KEY")
-    )
-
     prompt = f"""
 		Two CS students just matched on a social app called CSOC.
 		
@@ -701,13 +709,14 @@ def get_icebreaker(
 	Return only the message, nothing else.
 	"""
 
-    message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=100,
-        messages=[{"role": "user", "content": prompt}],
+    response = client.models.generate_content(
+        model="gemini-flash-latest",
+        contents=[prompt],
     )
 
-    return {"icebreaker": message.content[0].text}
+    message = response.text
+
+    return {"icebreaker": message}
 
 
 # ===== Notifications =====
