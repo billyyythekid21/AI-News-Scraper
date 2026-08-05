@@ -706,7 +706,8 @@ def get_icebreaker(
 	
 	Write one short, natural conversation starter that Person A could send to Person B. 
 	Reference something specific they have in common. Keep it casual, friendly, and under 2 sentences. 
-	Return only the message, nothing else.
+	Return only the message, nothing else. Do not include any other text or comments, and humanise it with no em dashes,
+    make it conversational and something a Gen Z uni student would say.
 	"""
 
     response = client.models.generate_content(
