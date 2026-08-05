@@ -2,8 +2,12 @@ import os
 from google import genai
 from twilio.rest import Client
 
-gemini = genai.Client(api_key=os.getenv("GENAI_API_KEY"))
-twilio = Client(os.getenv("ACCOUNT_SID"), os.getenv("AUTH_TOKEN"))
+gemini = genai.Client(api_key=os.getenv("GOOGLE_API_KEY") or os.getenv("GENAI_API_KEY"))
+_account_sid = os.getenv("ACCOUNT_SID")
+_auth_token = os.getenv("AUTH_TOKEN")
+if not _account_sid or not _auth_token:
+    print("WARNING: ACCOUNT_SID or AUTH_TOKEN is not set — news will fail")
+twilio = Client(_account_sid, _auth_token)
 FROM_NUMBER = f"whatsapp:{os.getenv('TWILIO_FROM_NUMBER')}"
 
 
@@ -17,7 +21,7 @@ def scrape_news(topic: str = "AI, Technology and Science") -> str:
     - https://source1.com ... - https://source10.com
     """
     response = gemini.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-flash-latest",
         contents=prompt,
     )
     return response.text
