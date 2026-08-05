@@ -19,10 +19,11 @@ build
 .eslintcache
 coverage
 
-# Environment variables
+# Environment variables / local config
 .env
 .env.*
-!.env.example
+backend/.env
+backend/.env.*
 
 # Editor directories and files
 .vscode/*
@@ -54,9 +55,14 @@ env/
 *.dump
 *.bak
 
-# Local secrets (VAPID keys, generated credentials, etc. - never commit)
+# Local secrets (VAPID keys, API credentials, etc. DO NOT COMMIT)
 .secrets/
 backend/.secrets/
+*.pem
+credentials.json
+service-account*.json
+**/google-services.json
+**/GoogleService-Info.plist
 
 # Expo / React Native
 .expo/
@@ -79,3 +85,9 @@ mobile/android/.gradle/
 mobile/android/build/
 mobile/android/app/build/
 mobile/android/local.properties
+
+# Misc local/temp
+*.ics
+tmp/
+temp/
+.cache/
