@@ -25,15 +25,15 @@ function Login() {
 
 	return (
 		<AuthLayout
-			title="Welcome Back!"
-			subtitle="Good to see you again!"
+			title="Log in"
+			subtitle="Welcome back and keep exploring."
 			error={error}
 			footer={
 				<>
 					No account?{' '}
 					<Link
 						to="/signup"
-						className="text-green-400 hover:text-green-300 transition"
+						className="font-semibold text-[var(--csoc-accent)] underline-offset-4 hover:underline"
 					>
 						Sign up
 					</Link>
@@ -47,6 +47,7 @@ function Login() {
 				<Field
 					label="Email"
 					name="email"
+					type="email"
 					placeholder="yourname@email.com"
 					autoComplete="email"
 					onChange={handleChange}
@@ -61,7 +62,7 @@ function Login() {
 				/>
 				<button
 					type="submit"
-					className="bg-green-500 hover:bg-green-400 text-black font-semibold rounded-lg py-3 mt-2 transition"
+					className="mt-2 bg-[var(--csoc-accent)] py-3.5 text-sm font-semibold text-white transition hover:bg-[var(--csoc-accent-hover)]"
 				>
 					Log in
 				</button>
