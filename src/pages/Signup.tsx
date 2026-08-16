@@ -28,17 +28,17 @@ function Signup() {
 
 	return (
 		<AuthLayout
-			title="Create an Account"
-			subtitle="Welcome to csoc!"
+			title="Join csoc"
+			subtitle="A minute of form filling, a lifetime of memories."
 			error={error}
 			footer={
 				<>
 					Already have an account?{' '}
 					<Link
 						to="/login"
-						className="text-green-400 hover:text-green-300 transition"
+						className="font-semibold text-[var(--csoc-accent)] underline-offset-4 hover:underline"
 					>
-						Login
+						Log in
 					</Link>
 				</>
 			}
@@ -57,6 +57,7 @@ function Signup() {
 				<Field
 					label="Email"
 					name="email"
+					type="email"
 					placeholder="yourname@email.com"
 					autoComplete="email"
 					onChange={handleChange}
@@ -71,9 +72,9 @@ function Signup() {
 				/>
 				<button
 					type="submit"
-					className="bg-green-500 hover:bg-green-400 text-black font-semibold rounded-lg py-3 mt-2 transition"
+					className="mt-2 bg-[var(--csoc-accent)] py-3.5 text-sm font-semibold text-white transition hover:bg-[var(--csoc-accent-hover)]"
 				>
-					Sign Up
+					Create account
 				</button>
 			</form>
 		</AuthLayout>
