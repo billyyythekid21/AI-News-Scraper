@@ -16,43 +16,67 @@ function AuthLayout({
 	footer,
 }: AuthLayoutProps) {
 	return (
-		<div className="min-h-screen bg-black flex">
-			{/* Left panel */}
-			<div className="hidden md:flex flex-col justify-between md:w-1/2 bg-green-500 p-12">
-				<span className="text-black font-bold text-xl">csoc</span>
-				<div>
-					<h1 className="text-black text-5xl font-bold leading-tight mb-4">
+		<div className="min-h-screen flex bg-[var(--csoc-paper)] text-[var(--csoc-ink)]">
+			{/* Left panel background */}
+			<section className="csoc-hatch relative hidden md:flex w-[52%] flex-col justify-between overflow-hidden p-12 text-white">
+				<div
+					className="pointer-events-none absolute -right-16 top-20 h-72 w-72 rounded-full opacity-30"
+					style={{ background: 'var(--csoc-spot)' }}
+					aria-hidden
+				/>
+				<div
+					className="pointer-events-none absolute -bottom-24 left-10 h-80 w-80 rounded-full opacity-25"
+					style={{ background: 'var(--csoc-accent)' }}
+					aria-hidden
+				/>
+
+				<p className="csoc-fade font-display text-3xl font-extrabold tracking-tight relative">
+					csoc
+				</p>
+
+				<div className="csoc-rise relative max-w-md">
+					<h1 className="font-display text-5xl font-extrabold leading-[1.05] tracking-tight lg:text-6xl">
 						Touch grass.
 						<br />
 						Meet people.
 					</h1>
-					<p className="text-black/70 text-lg">
-						For CS students who spend too much time inside.
+					<p className="mt-5 text-lg text-white/70 leading-relaxed">
+						The place for students who want study buddies, events,
+						and someone to sit next to in their labs every week without the awkwardness
+						of having to navigate dead labs.
 					</p>
 				</div>
-			</div>
+
+				<p className="csoc-fade relative text-sm text-white/45">
+					Billy Wu 2026
+				</p>
+			</section>
 
 			{/* Right panel */}
-			<div className="flex flex-col justify-center w-full md:w-1/2 p-8 md:p-16">
-				<div className="max-w-sm w-full mx-auto">
-					<h2 className="text-white text-3xl font-bold mb-2">
+			<section className="flex w-full flex-col justify-center px-6 py-12 md:w-[48%] md:px-16">
+				<div className="csoc-rise-delay mx-auto w-full max-w-sm">
+					<p className="mb-8 font-display text-2xl font-extrabold tracking-tight md:hidden">
+						csoc
+					</p>
+
+					<h2 className="font-display text-3xl font-bold tracking-tight">
 						{title}
 					</h2>
-					<p className="text-gray-500 mb-8">{subtitle}</p>
+					<p className="mt-2 text-[var(--csoc-muted)]">{subtitle}</p>
 
 					{error && (
-						<div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 mb-6 text-sm">
+						<div className="mt-6 border border-[var(--csoc-spot)]/30 bg-[var(--csoc-spot)]/8 px-4 py-3 text-sm text-[var(--csoc-spot)]">
 							{error}
 						</div>
 					)}
 
-					{children}
+					<div className="mt-8">{children}</div>
 
-					<p className="text-gray-600 mt-6 text-center text-sm">
+					<p className="mt-8 text-center text-sm text-[var(--csoc-muted)]">
 						{footer}
 					</p>
 				</div>
-			</div>
+			</section>
 		</div>
 	);
 }
@@ -75,10 +99,10 @@ export function Field({
 	onChange,
 }: FieldProps) {
 	return (
-		<div className="flex flex-col gap-1">
+		<div className="flex flex-col gap-1.5">
 			<label
 				htmlFor={name}
-				className="text-gray-400 text-sm"
+				className="text-sm font-medium text-[var(--csoc-ink)]"
 			>
 				{label}
 			</label>
@@ -89,7 +113,7 @@ export function Field({
 				placeholder={placeholder}
 				autoComplete={autoComplete}
 				onChange={onChange}
-				className="bg-gray-900 border border-gray-800 text-white placeholder-gray-600 rounded-lg px-4 py-3 outline-none focus:border-green-500 transition"
+				className="border border-[var(--csoc-line)] bg-white px-4 py-3 text-[var(--csoc-ink)] outline-none transition placeholder:text-[var(--csoc-muted)]/60 focus:border-[var(--csoc-accent)]"
 			/>
 		</div>
 	);
