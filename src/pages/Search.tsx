@@ -58,35 +58,31 @@ function Search() {
 	};
 
 	return (
-		<div className="min-h-screen bg-black text-white">
-			<div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-				<button
-					onClick={() => navigate('/')}
-					className="text-black-500 font-bold text-lg"
-				>
+		<div className="csoc-page">
+			<header className="csoc-header">
+				<button onClick={() => navigate('/')} className="csoc-brand">
 					csoc
 				</button>
-			</div>
+			</header>
 
-			<div className="max-w-lg mx-auto px-6 py-8">
-				<h1 className="text-3xl font-bold mb-8">Search</h1>
+			<div className="max-w-lg mx-auto px-6 py-10">
+				<h1 className="font-display text-4xl font-extrabold tracking-tight mb-8">
+					Search
+				</h1>
 
-				<form
-					onSubmit={handleSearch}
-					className="flex gap-2 mb-10"
-				>
+				<form onSubmit={handleSearch} className="flex gap-2 mb-10">
 					<input
 						placeholder="Search people, courses, events..."
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
-						className="flex-1 bg-gray-900 border border-gray-800 text-white placeholder-gray-600 rounded-lg px-4 py-3 outline-none focus:border-green-500 transition"
+						className="csoc-input flex-1"
 					/>
 					<button
 						type="submit"
-						className="bg-green-500 hover:bg-green-400 text-black font-semibold px-5 py-3 rounded-lg transition inline-flex items-center gap-2"
+						className="csoc-btn inline-flex items-center gap-2 shrink-0"
 					>
 						{loading ? (
-							'...'
+							'…'
 						) : (
 							<>
 								<SearchIcon className="w-4 h-4" />
@@ -98,121 +94,89 @@ function Search() {
 
 				{searched && (
 					<>
-						<div className="mb-8">
-							<h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
+						<section className="mb-10">
+							<h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--csoc-muted)] mb-4">
 								People
 							</h2>
 							{users.length === 0 ? (
-								<p className="text-gray-600 text-sm">
-									No people found
-								</p>
+								<p className="text-sm text-[var(--csoc-muted)]">No people found</p>
 							) : (
-								<div className="flex flex-col gap-3">
+								<div className="divide-y divide-[var(--csoc-line)] border-y border-[var(--csoc-line)]">
 									{users.map((u) => (
-										<div
-											key={u.id}
-											className="bg-gray-900 border border-gray-800 rounded-xl p-4"
-										>
-											<p className="text-white font-semibold mb-2">
-												{u.username}
-											</p>
-											<div className="flex flex-col gap-1">
+										<article key={u.id} className="py-4">
+											<p className="font-semibold mb-2">{u.username}</p>
+											<div className="flex flex-col gap-1 text-sm">
 												{u.course && (
-													<div className="flex gap-2 text-sm">
-														<span className="text-gray-500">
+													<div className="flex gap-3">
+														<span className="text-[var(--csoc-muted)] w-16">
 															Studies
 														</span>
-														<span className="text-gray-300">
-															{u.course}
-														</span>
+														<span>{u.course}</span>
 													</div>
 												)}
 												{u.interests && (
-													<div className="flex gap-2 text-sm">
-														<span className="text-gray-500">
+													<div className="flex gap-3">
+														<span className="text-[var(--csoc-muted)] w-16">
 															Into
 														</span>
-														<span className="text-gray-300">
-															{u.interests}
-														</span>
+														<span>{u.interests}</span>
 													</div>
 												)}
 												{u.location && (
-													<div className="flex gap-2 text-sm">
-														<span className="text-gray-500">
+													<div className="flex gap-3">
+														<span className="text-[var(--csoc-muted)] w-16">
 															Based in
 														</span>
-														<span className="text-gray-300">
-															{u.location}
-														</span>
+														<span>{u.location}</span>
 													</div>
 												)}
 											</div>
-										</div>
+										</article>
 									))}
 								</div>
 							)}
-						</div>
+						</section>
 
-						<div>
-							<h2 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">
+						<section>
+							<h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--csoc-muted)] mb-4">
 								Events
 							</h2>
 							{events.length === 0 ? (
-								<p className="text-gray-600 text-sm">
-									No events found
-								</p>
+								<p className="text-sm text-[var(--csoc-muted)]">No events found</p>
 							) : (
-								<div className="flex flex-col gap-3">
+								<div className="divide-y divide-[var(--csoc-line)] border-y border-[var(--csoc-line)]">
 									{events.map((e) => (
-										<div
-											key={e.id}
-											className="bg-gray-900 border border-gray-800 rounded-xl p-4"
-										>
-											<p className="text-white font-semibold mb-2">
-												{e.title}
-											</p>
-											<div className="flex flex-col gap-1">
-												<div className="flex gap-2 text-sm">
-													<span className="text-gray-500">
-														When
-													</span>
-													<span className="text-gray-300">
-														{new Date(
-															e.starts_at,
-														).toLocaleString()}
-													</span>
+										<article key={e.id} className="py-4">
+											<p className="font-semibold mb-2">{e.title}</p>
+											<div className="flex flex-col gap-1 text-sm">
+												<div className="flex gap-3">
+													<span className="text-[var(--csoc-muted)] w-14">When</span>
+													<span>{new Date(e.starts_at).toLocaleString()}</span>
 												</div>
 												{e.location && (
-													<div className="flex gap-2 text-sm">
-														<span className="text-gray-500">
+													<div className="flex gap-3">
+														<span className="text-[var(--csoc-muted)] w-14">
 															Where
 														</span>
-														<span className="text-gray-300">
-															{e.location}
-														</span>
+														<span>{e.location}</span>
 													</div>
 												)}
-												<div className="flex gap-2 text-sm">
-													<span className="text-gray-500">
-														By
-													</span>
-													<span className="text-gray-300">
-														{e.organizer}
-													</span>
+												<div className="flex gap-3">
+													<span className="text-[var(--csoc-muted)] w-14">By</span>
+													<span>{e.organizer}</span>
 												</div>
 											</div>
-										</div>
+										</article>
 									))}
 								</div>
 							)}
-						</div>
+						</section>
 					</>
 				)}
 
 				<button
 					onClick={() => navigate('/')}
-					className="mt-10 text-black-500 hover:text-white text-sm transition inline-flex items-center gap-1"
+					className="mt-10 csoc-btn-ghost inline-flex items-center gap-1 text-[var(--csoc-accent)]"
 				>
 					<ArrowLeft className="w-4 h-4" />
 					Home
