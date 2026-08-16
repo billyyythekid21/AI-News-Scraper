@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Calendar, Plus, Check } from 'lucide-react';
+import { Plus, Check } from 'lucide-react';
 
 interface Event {
 	id: string;
@@ -15,6 +15,14 @@ interface Event {
 	user_rsvpd?: boolean;
 }
 
+const emptyForm = {
+	title: '',
+	description: '',
+	location: '',
+	starts_at: '',
+	tags: '',
+};
+
 function Events() {
 	const navigate = useNavigate();
 	const [events, setEvents] = useState<Event[]>([]);
@@ -23,56 +31,50 @@ function Events() {
 	const [page, setPage] = useState(0);
 	const [total, setTotal] = useState(0);
 	const limit = 10;
-	const [form, setForm] = useState({
-		title: '',
-		description: '',
-		location: '',
-		starts_at: '',
-		tags: '',
-	});
+	const [form, setForm] = useState(emptyForm);
 	const [editingEventId, setEditingEventId] = useState<string | null>(null);
-	const [editForm, setEditForm] = useState({
-		title: '',
-		description: '',
-		location: '',
-		starts_at: '',
-		tags: '',
-	});
+	const [editForm, setEditForm] = useState(emptyForm);
 	const [myUsername, setMyUsername] = useState<string>('');
 
 	const token = localStorage.getItem('token');
 
 	const fetchEvents = async () => {
-		const meRes = await axios.get('http://localhost:8000/me', {
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		const currentUsername = meRes.data.username;
-		setMyUsername(currentUsername);
+		try {
+			const meRes = await axios.get('http://localhost:8000/me', {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			const currentUsername = meRes.data.username;
+			setMyUsername(currentUsername);
 
-		const res = await axios.get(`http://localhost:8000/events?skip=${page * limit}&limit=${limit}`, {
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		setTotal(res.data.total);
+			const res = await axios.get(
+				`http://localhost:8000/events?skip=${page * limit}&limit=${limit}`,
+				{ headers: { Authorization: `Bearer ${token}` } },
+			);
+			setTotal(res.data.total);
 
-		const eventsWithRsvp = await Promise.all(
-			res.data.events.map(async (event: Event) => {
-				const rsvpRes = await axios.get(
-					`http://localhost:8000/events/${event.id}/rsvps`,
-					{ headers: { Authorization: `Bearer ${token}` } },
-				);
-				const rsvps = rsvpRes.data;
-				return {
-					...event,
-					rsvp_count: rsvps.length,
-					user_rsvpd: rsvps.some(
-						(r: { username: string }) => r.username === currentUsername,
-					),
-				};
-			}),
-		);
+			const eventsWithRsvp = await Promise.all(
+				res.data.events.map(async (event: Event) => {
+					const rsvpRes = await axios.get(
+						`http://localhost:8000/events/${event.id}/rsvps`,
+						{ headers: { Authorization: `Bearer ${token}` } },
+					);
+					const rsvps = rsvpRes.data;
+					return {
+						...event,
+						rsvp_count: rsvps.length,
+						user_rsvpd: rsvps.some(
+							(r: { username: string }) => r.username === currentUsername,
+						),
+					};
+				}),
+			);
 
-		setEvents(eventsWithRsvp);
-		setLoading(false);
+			setEvents(eventsWithRsvp);
+		} catch {
+			if (!token) navigate('/login');
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -94,25 +96,21 @@ function Events() {
 		await axios.post('http://localhost:8000/events', form, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
+		setForm(emptyForm);
 		setShowForm(false);
 		fetchEvents();
 	};
 
 	const handleRsvp = async (event: Event) => {
 		if (event.user_rsvpd) {
-			await axios.delete(
-				`http://localhost:8000/events/${event.id}/rsvp`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
+			await axios.delete(`http://localhost:8000/events/${event.id}/rsvp`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 		} else {
 			await axios.post(
 				`http://localhost:8000/events/${event.id}/rsvp`,
 				{},
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
+				{ headers: { Authorization: `Bearer ${token}` } },
 			);
 		}
 		fetchEvents();
@@ -136,117 +134,110 @@ function Events() {
 
 	if (loading)
 		return (
-			<div className="min-h-screen bg-black flex items-center justify-center">
-				<div className="text-gray-500">Loading...</div>
+			<div className="csoc-page flex items-center justify-center text-[var(--csoc-muted)]">
+				Loading…
 			</div>
 		);
 
 	return (
-		<div className="min-h-screen bg-black text-white">
-			<div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-				<button
-					onClick={() => navigate('/')}
-					className="text-black-500 font-bold text-lg"
-				>
+		<div className="csoc-page">
+			<header className="csoc-header">
+				<button onClick={() => navigate('/')} className="csoc-brand">
 					csoc
 				</button>
 				<button
 					onClick={() => setShowForm(!showForm)}
-					className={`text-sm px-4 py-2 rounded-lg font-medium transition ${
-						showForm
-							? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-							: 'bg-green-500 hover:bg-green-400 text-black'
-					} inline-flex items-center gap-1`}
+					className={`text-sm font-medium inline-flex items-center gap-1 ${
+						showForm ? 'csoc-btn-ghost' : 'csoc-btn'
+					}`}
 				>
 					{showForm ? (
 						'Cancel'
 					) : (
 						<>
 							<Plus className="w-4 h-4" />
-							Post Event
+							Post event
 						</>
 					)}
 				</button>
-			</div>
+			</header>
 
-			<div className="max-w-lg mx-auto px-6 py-8">
-				<h1 className="text-3xl font-bold mb-8 text-center">Events</h1>
+			<div className="max-w-lg mx-auto px-6 py-10">
+				<h1 className="font-display text-4xl font-extrabold tracking-tight mb-8">
+					Events
+				</h1>
 
 				{showForm && (
 					<form
 						onSubmit={handleSubmit}
-						className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8 flex flex-col gap-4"
+						className="csoc-panel mb-8 flex flex-col gap-4"
 					>
-						<h2 className="text-lg font-semibold">New Event</h2>
+						<h2 className="font-display text-lg font-bold">New event</h2>
 						<input
 							name="title"
 							placeholder="Title"
+							value={form.title}
 							onChange={handleChange}
 							required
-							className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 transition"
+							className="csoc-input"
 						/>
 						<textarea
 							name="description"
 							placeholder="Description"
+							value={form.description}
 							onChange={handleChange}
-							rows={6}
-							className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 transition resize-none"
+							rows={5}
+							className="csoc-input resize-none"
 						/>
 						<input
 							name="location"
 							placeholder="Location"
+							value={form.location}
 							onChange={handleChange}
-							className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 transition"
+							className="csoc-input"
 						/>
 						<input
 							name="starts_at"
 							type="datetime-local"
+							value={form.starts_at}
 							onChange={handleChange}
 							required
-							className="bg-black border border-gray-700 text-white rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 transition"
+							className="csoc-input"
 						/>
 						<input
 							name="tags"
 							placeholder="Tags (e.g. study, cs, social)"
+							value={form.tags}
 							onChange={handleChange}
-							className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-3 text-sm outline-none focus:border-green-500 transition"
+							className="csoc-input"
 						/>
-					<button
-						type="submit"
-						className="bg-green-500 hover:bg-green-400 text-black rounded-lg px-4 py-3 text-sm font-medium transition inline-flex items-center justify-center gap-1"
-					>
-						<Plus className="w-4 h-4" />
-						Post Event
-					</button>
+						<button type="submit" className="csoc-btn inline-flex items-center justify-center gap-1">
+							<Plus className="w-4 h-4" />
+							Post event
+						</button>
 					</form>
 				)}
 
 				{events.length === 0 && (
-					<div className="flex flex-col items-center justify-center py-24 text-center">
-						<Calendar className="w-10 h-10 mb-4 text-gray-500" />
-						<p className="text-gray-400 mb-2">No events yet.</p>
-						<p className="text-gray-600 text-sm">
-							Be the first to post one!
-						</p>
+					<div className="py-20 text-center">
+						<p className="text-[var(--csoc-muted)] mb-1">No events yet.</p>
+						<p className="text-sm text-[var(--csoc-muted)]">Be the first to post one.</p>
 					</div>
 				)}
 
-				<div className="flex flex-col gap-4">
+				<div className="divide-y divide-[var(--csoc-line)] border-y border-[var(--csoc-line)]">
 					{events.map((event) => (
-						<div
-							key={event.id}
-							className="bg-gray-900 border border-gray-800 rounded-2xl p-6"
-						>
-							<div className="flex items-center justify-between mb-3">
-								<h2 className="text-lg font-bold text-white">
+						<article key={event.id} className="py-6">
+							<div className="flex items-start justify-between gap-4 mb-3">
+								<h2 className="font-display text-xl font-bold tracking-tight">
 									{event.title}
 								</h2>
 								<button
 									onClick={() => handleRsvp(event)}
-									className={`text-sm px-3 py-1 rounded-lg font-medium transition ml-4 shrink-0 inline-flex items-center gap-1 ${
+									className={`text-sm px-3 py-1.5 font-medium shrink-0 inline-flex items-center gap-1 transition ${
 										event.user_rsvpd
-											? 'bg-green-500/20 text-green-400 hover:bg-red-500/20 hover:text-red-400'
-											: 'bg-gray-800 text-gray-300 hover:bg-green-500/20 hover:text-green-400'
+											? 'bg-[var(--csoc-accent)]/10 text-[var(--csoc-accent)]'
+											: 'border border-[var(--csoc-line)] bg-white hover:border-[var(--csoc-accent)]'
 									}`}
 								>
 									<Check className="w-4 h-4" />
@@ -255,48 +246,36 @@ function Events() {
 							</div>
 
 							{event.description && (
-								<p className="text-gray-300 text-sm leading-relaxed mb-4">
+								<p className="text-sm text-[var(--csoc-muted)] leading-relaxed mb-4">
 									{event.description}
 								</p>
 							)}
 
-							<div className="flex flex-col gap-2">
-								<div className="flex gap-2 text-sm">
-									<span className="text-gray-500">
-										Posted by:
-									</span>
-									<span className="text-white">
-										{event.organizer}
-									</span>
+							<div className="flex flex-col gap-2 text-sm">
+								<div className="flex gap-3">
+									<span className="text-[var(--csoc-muted)] w-14">By</span>
+									<span>{event.organizer}</span>
 								</div>
-								<div className="flex gap-2 text-sm">
-									<span className="text-gray-500">When:</span>
-									<span className="text-white">
-										{new Date(event.starts_at).toLocaleString()}
-									</span>
+								<div className="flex gap-3">
+									<span className="text-[var(--csoc-muted)] w-14">When</span>
+									<span>{new Date(event.starts_at).toLocaleString()}</span>
 								</div>
 								{event.location && (
-									<div className="flex gap-2 text-sm">
-										<span className="text-gray-500">
-											Where:
-										</span>
-										<span className="text-white">
-											{event.location}
-										</span>
+									<div className="flex gap-3">
+										<span className="text-[var(--csoc-muted)] w-14">Where</span>
+										<span>{event.location}</span>
 									</div>
 								)}
 								{event.tags && (
-									<div className="flex gap-2 text-sm">
-										<span className="text-gray-500">Tags:</span>
-										<span className="text-white">
-											{event.tags}
-										</span>
+									<div className="flex gap-3">
+										<span className="text-[var(--csoc-muted)] w-14">Tags</span>
+										<span>{event.tags}</span>
 									</div>
 								)}
 							</div>
 
 							{event.organizer === myUsername && (
-								<div className="flex gap-2 mt-3">
+								<div className="flex gap-3 mt-4">
 									<button
 										onClick={() => {
 											setEditingEventId(event.id);
@@ -308,13 +287,13 @@ function Events() {
 												tags: event.tags || '',
 											});
 										}}
-										className="text-gray-500 hover:text-white text-xs transition"
+										className="csoc-btn-ghost text-xs"
 									>
 										Edit
 									</button>
 									<button
 										onClick={() => handleDelete(event.id)}
-										className="text-gray-500 hover:text-red-400 text-xs transition"
+										className="csoc-btn-ghost text-xs hover:text-[var(--csoc-spot)]"
 									>
 										Delete
 									</button>
@@ -322,14 +301,14 @@ function Events() {
 							)}
 
 							{editingEventId === event.id && (
-								<div className="mt-4 flex flex-col gap-3 border-t border-gray-700 pt-4">
+								<div className="mt-4 flex flex-col gap-3 border-t border-[var(--csoc-line)] pt-4">
 									<input
 										placeholder="Title"
 										value={editForm.title}
 										onChange={(e) =>
 											setEditForm({ ...editForm, title: e.target.value })
 										}
-										className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500 transition"
+										className="csoc-input"
 									/>
 									<textarea
 										placeholder="Description"
@@ -338,7 +317,7 @@ function Events() {
 											setEditForm({ ...editForm, description: e.target.value })
 										}
 										rows={2}
-										className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500 transition resize-none"
+										className="csoc-input resize-none"
 									/>
 									<input
 										placeholder="Location"
@@ -346,7 +325,7 @@ function Events() {
 										onChange={(e) =>
 											setEditForm({ ...editForm, location: e.target.value })
 										}
-										className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500 transition"
+										className="csoc-input"
 									/>
 									<input
 										type="datetime-local"
@@ -354,7 +333,7 @@ function Events() {
 										onChange={(e) =>
 											setEditForm({ ...editForm, starts_at: e.target.value })
 										}
-										className="bg-black border border-gray-700 text-white rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500 transition"
+										className="csoc-input"
 									/>
 									<input
 										placeholder="Tags"
@@ -362,32 +341,34 @@ function Events() {
 										onChange={(e) =>
 											setEditForm({ ...editForm, tags: e.target.value })
 										}
-										className="bg-black border border-gray-700 text-white placeholder-gray-600 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500 transition"
+										className="csoc-input"
 									/>
-									<div className="flex gap-2">
+									<div className="flex gap-3 items-center">
 										<button
 											onClick={() => handleEdit(event.id)}
-											className="bg-green-500 hover:bg-green-400 text-black font-semibold rounded-lg px-4 py-2 text-sm transition"
+											className="csoc-btn text-sm"
 										>
 											Save
 										</button>
 										<button
 											onClick={() => setEditingEventId(null)}
-											className="text-gray-500 hover:text-white text-sm transition"
+											className="csoc-btn-ghost text-sm"
 										>
 											Cancel
 										</button>
 									</div>
 								</div>
 							)}
-						</div>
+						</article>
 					))}
+				</div>
 
-					<div className="flex gap-4 mt-6 items-center">
+				{total > 0 && (
+					<div className="flex gap-4 mt-8 items-center">
 						<button
 							onClick={() => setPage((p) => p - 1)}
 							disabled={page === 0}
-							className="text-black-500 hover:text-white text-sm transition disabled:opacity-30"
+							className="csoc-btn-ghost text-sm disabled:opacity-30"
 						>
 							← Previous
 						</button>
@@ -397,12 +378,12 @@ function Events() {
 						<button
 							onClick={() => setPage((p) => p + 1)}
 							disabled={(page + 1) * limit >= total}
-							className="text-black-500 hover:text-white text-sm transition disabled:opacity-30"
+							className="csoc-btn-ghost text-sm disabled:opacity-30"
 						>
 							Next →
 						</button>
 					</div>
-				</div>
+				)}
 			</div>
 		</div>
 	);
