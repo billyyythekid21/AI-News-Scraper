@@ -1,22 +1,171 @@
 @import 'tailwindcss';
 
+:root {
+	--csoc-paper: #e9ecf1;
+	--csoc-ink: #111318;
+	--csoc-muted: #5c6570;
+	--csoc-line: #c5cbd6;
+	--csoc-accent: #1f6feb;
+	--csoc-accent-hover: #1558c0;
+	--csoc-spot: #ff4d2e;
+	--font-display: 'Syne', sans-serif;
+	--font-body: 'Figtree', sans-serif;
+}
+
 @layer base {
 	button {
-		background-color: var(--color-green-500);
-		color: var(--color-black);
-		font-weight: var(--font-weight-semibold);
-		padding: 0.5rem 1rem;
-		border-radius: var(--radius-lg);
 		cursor: pointer;
-		transition: background-color var(--default-transition-duration)
-			var(--default-transition-timing-function);
-	}
-
-	button:hover {
-		background-color: var(--color-green-400);
 	}
 }
 
 body {
-	font-family: 'DM Sans', sans-serif;
+	font-family: var(--font-body);
+	color: var(--csoc-ink);
+	background: var(--csoc-paper);
+	-webkit-font-smoothing: antialiased;
+}
+
+@keyframes csoc-rise {
+	from {
+		opacity: 0;
+		transform: translateY(14px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes csoc-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.csoc-rise {
+	animation: csoc-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.csoc-rise-delay {
+	animation: csoc-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.csoc-fade {
+	animation: csoc-fade 0.6s ease both;
+}
+
+.font-display {
+	font-family: var(--font-display);
+}
+
+.csoc-page {
+	min-height: 100vh;
+	background: var(--csoc-paper);
+	color: var(--csoc-ink);
+}
+
+.csoc-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--csoc-line);
+	padding: 1.25rem 1.5rem;
+}
+
+.csoc-brand {
+	font-family: var(--font-display);
+	font-size: 1.5rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	background: transparent;
+	color: var(--csoc-ink);
+	padding: 0;
+	border-radius: 0;
+}
+
+.csoc-brand:hover {
+	background: transparent;
+	color: var(--csoc-accent);
+}
+
+.csoc-input {
+	width: 100%;
+	border: 1px solid var(--csoc-line);
+	background: #fff;
+	padding: 0.75rem 1rem;
+	color: var(--csoc-ink);
+	outline: none;
+	transition: border-color 0.15s ease;
+}
+
+.csoc-input:focus {
+	border-color: var(--csoc-accent);
+}
+
+.csoc-input::placeholder {
+	color: color-mix(in srgb, var(--csoc-muted) 55%, transparent);
+}
+
+.csoc-btn {
+	background: var(--csoc-accent);
+	color: #fff;
+	font-weight: 600;
+	padding: 0.75rem 1.25rem;
+	border-radius: 0;
+	transition: background-color 0.15s ease;
+}
+
+.csoc-btn:hover {
+	background: var(--csoc-accent-hover);
+}
+
+.csoc-btn-ghost {
+	background: transparent;
+	color: var(--csoc-muted);
+	font-weight: 500;
+	padding: 0.5rem 0;
+	border-radius: 0;
+}
+
+.csoc-btn-ghost:hover {
+	background: transparent;
+	color: var(--csoc-ink);
+}
+
+.csoc-btn-ink {
+	background: var(--csoc-ink);
+	color: #fff;
+	font-weight: 600;
+	padding: 0.75rem 1.25rem;
+	border-radius: 0;
+}
+
+.csoc-btn-ink:hover {
+	background: var(--csoc-accent);
+}
+
+.csoc-panel {
+	border-top: 1px solid var(--csoc-line);
+	border-bottom: 1px solid var(--csoc-line);
+	background: #fff;
+	padding: 1.5rem;
+}
+
+.csoc-hatch {
+	background-color: var(--csoc-ink);
+	background-image:
+		linear-gradient(
+			135deg,
+			rgba(255, 255, 255, 0.04) 25%,
+			transparent 25%,
+			transparent 50%,
+			rgba(255, 255, 255, 0.04) 50%,
+			rgba(255, 255, 255, 0.04) 75%,
+			transparent 75%,
+			transparent
+		);
+	background-size: 18px 18px;
 }
