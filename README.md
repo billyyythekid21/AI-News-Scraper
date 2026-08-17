@@ -8,9 +8,7 @@ A social app for uni students (mostly for CS/IT students, but all are welcome) t
 
 ## What it is
 
-
-
-csoc helps students connect beyond lectures and group chats — match with people who share your course or interests, then actually meet through campus events.
+csoc helps students match with people who share their courses or interests, making connecting beyond labs and lectures easier and more personalised.
 
 ---
 
