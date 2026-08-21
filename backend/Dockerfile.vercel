@@ -15,5 +15,5 @@ COPY app ./app
 
 ENV PYTHONUNBUFFERED=1
 
-# Vercel routes traffic to whatever port the container listens on via $PORT.
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
+# Vercel routes traffic to port 80 unless a PORT env var overrides it.
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-80}"]
