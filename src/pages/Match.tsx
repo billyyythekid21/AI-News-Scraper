@@ -32,7 +32,7 @@ function Match() {
 		}
 
 		axios
-			.get('http://localhost:8000/matches', {
+			.get('/matches', {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			.then((res) => {
@@ -54,8 +54,8 @@ function Match() {
 		setIndex(0);
 		setLoading(true);
 		const url = courseFilter
-			? `http://localhost:8000/matches?course=${encodeURIComponent(courseFilter)}`
-			: 'http://localhost:8000/matches';
+			? `/matches?course=${encodeURIComponent(courseFilter)}`
+			: '/matches';
 		axios
 			.get(url, {
 				headers: { Authorization: `Bearer ${token}` },
@@ -73,7 +73,7 @@ function Match() {
 		setIndex(0);
 		setLoading(true);
 		axios
-			.get('http://localhost:8000/matches', {
+			.get('/matches', {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			.then((res) => {
@@ -86,7 +86,7 @@ function Match() {
 	const handleAction = async (action: 'like' | 'pass') => {
 		const user = matches[index];
 		const res = await axios.post(
-			'http://localhost:8000/matches/action',
+			'/matches/action',
 			{
 				to_user_id: user.id,
 				action,

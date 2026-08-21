@@ -22,7 +22,7 @@ function Home() {
 			return;
 		}
 		axios
-			.get('http://localhost:8000/me', {
+			.get('/me', {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			.then((res) => {

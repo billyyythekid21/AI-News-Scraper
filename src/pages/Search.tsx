@@ -41,7 +41,7 @@ function Search() {
 		setLoading(true);
 		try {
 			const res = await axios.get(
-				`http://localhost:8000/search?q=${encodeURIComponent(query)}`,
+				`/search?q=${encodeURIComponent(query)}`,
 				{ headers: { Authorization: `Bearer ${token}` } },
 			);
 			setUsers(res.data.users);

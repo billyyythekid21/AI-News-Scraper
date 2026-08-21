@@ -58,7 +58,7 @@ function Profile() {
 		}
 
 		axios
-			.get('http://localhost:8000/me', {
+			.get('/me', {
 				headers: { Authorization: `Bearer ${token}` },
 			})
 			.then((res) => {
@@ -101,7 +101,7 @@ function Profile() {
 			)
 		)
 			return;
-		await axios.delete('http://localhost:8000/me', {
+		await axios.delete('/me', {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		localStorage.removeItem('token');
@@ -110,7 +110,7 @@ function Profile() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		await axios.patch('http://localhost:8000/me', form, {
+		await axios.patch('/me', form, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		setSaved(true);
@@ -130,7 +130,7 @@ function Profile() {
 
 		try {
 			const res = await axios.post(
-				'http://localhost:8000/me/timetable',
+				'/me/timetable',
 				formData,
 				{
 					headers: {

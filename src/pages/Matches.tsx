@@ -60,10 +60,10 @@ function Matches() {
 		}
 
 		Promise.all([
-			axios.get('http://localhost:8000/matches/mutual', {
+			axios.get('/matches/mutual', {
 				headers: { Authorization: `Bearer ${token}` },
 			}),
-			axios.get('http://localhost:8000/matches/liked', {
+			axios.get('/matches/liked', {
 				headers: { Authorization: `Bearer ${token}` },
 			}),
 		])
@@ -81,7 +81,7 @@ function Matches() {
 		setLoadingIcebreaker((prev) => ({ ...prev, [userId]: true }));
 		try {
 			const res = await axios.get(
-				`http://localhost:8000/matches/mutual/${userId}/icebreaker`,
+				`/matches/mutual/${userId}/icebreaker`,
 				{ headers: { Authorization: `Bearer ${token}` } },
 			);
 			setIcebreakers((prev) => ({ ...prev, [userId]: res.data.icebreaker }));
@@ -91,7 +91,7 @@ function Matches() {
 	};
 
 	const handleUnlike = async (userId: string) => {
-		await axios.delete(`http://localhost:8000/matches/action/${userId}`, {
+		await axios.delete(`/matches/action/${userId}`, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		setMatches((prev) => prev.filter((match) => match.id !== userId));

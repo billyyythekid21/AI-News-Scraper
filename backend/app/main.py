@@ -39,9 +39,25 @@ from app.services.timetable import parse_ical, find_availability, find_available
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="csoc_api")
+
+_cors_extra = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "").split(",")
+    if origin.strip()
+]
+_cors_origins = list(
+    dict.fromkeys(
+        [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            *_cors_extra,
+        ]
+    )
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

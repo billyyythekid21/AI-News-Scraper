@@ -15,7 +15,7 @@ function Login() {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
-			const res = await axios.post('http://localhost:8000/login', form);
+			const res = await axios.post('/login', form);
 			localStorage.setItem('token', res.data.token);
 			navigate('/');
 		} catch {

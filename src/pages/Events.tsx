@@ -40,14 +40,14 @@ function Events() {
 
 	const fetchEvents = async () => {
 		try {
-			const meRes = await axios.get('http://localhost:8000/me', {
+			const meRes = await axios.get('/me', {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 			const currentUsername = meRes.data.username;
 			setMyUsername(currentUsername);
 
 			const res = await axios.get(
-				`http://localhost:8000/events?skip=${page * limit}&limit=${limit}`,
+				`/events?skip=${page * limit}&limit=${limit}`,
 				{ headers: { Authorization: `Bearer ${token}` } },
 			);
 			setTotal(res.data.total);
@@ -55,7 +55,7 @@ function Events() {
 			const eventsWithRsvp = await Promise.all(
 				res.data.events.map(async (event: Event) => {
 					const rsvpRes = await axios.get(
-						`http://localhost:8000/events/${event.id}/rsvps`,
+						`/events/${event.id}/rsvps`,
 						{ headers: { Authorization: `Bearer ${token}` } },
 					);
 					const rsvps = rsvpRes.data;
@@ -93,7 +93,7 @@ function Events() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		await axios.post('http://localhost:8000/events', form, {
+		await axios.post('/events', form, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		setForm(emptyForm);
@@ -103,12 +103,12 @@ function Events() {
 
 	const handleRsvp = async (event: Event) => {
 		if (event.user_rsvpd) {
-			await axios.delete(`http://localhost:8000/events/${event.id}/rsvp`, {
+			await axios.delete(`/events/${event.id}/rsvp`, {
 				headers: { Authorization: `Bearer ${token}` },
 			});
 		} else {
 			await axios.post(
-				`http://localhost:8000/events/${event.id}/rsvp`,
+				`/events/${event.id}/rsvp`,
 				{},
 				{ headers: { Authorization: `Bearer ${token}` } },
 			);
@@ -118,14 +118,14 @@ function Events() {
 
 	const handleDelete = async (eventId: string) => {
 		if (!confirm('Delete this event?')) return;
-		await axios.delete(`http://localhost:8000/events/${eventId}`, {
+		await axios.delete(`/events/${eventId}`, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		fetchEvents();
 	};
 
 	const handleEdit = async (eventId: string) => {
-		await axios.patch(`http://localhost:8000/events/${eventId}`, editForm, {
+		await axios.patch(`/events/${eventId}`, editForm, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		setEditingEventId(null);

@@ -1,4 +1,4 @@
-const API = 'http://localhost:8000';
+import { API_BASE } from './base';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 	const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -27,7 +27,7 @@ export async function subscribeToPush(token: string): Promise<void> {
 
 	let subscription = await registration.pushManager.getSubscription();
 	if (!subscription) {
-		const res = await fetch(`${API}/push/vapid-public-key`);
+		const res = await fetch(`${API_BASE}/push/vapid-public-key`);
 		const { public_key } = await res.json();
 		if (!public_key) {
 			return;
@@ -38,7 +38,7 @@ export async function subscribeToPush(token: string): Promise<void> {
 		});
 	}
 
-	await fetch(`${API}/push/subscribe`, {
+	await fetch(`${API_BASE}/push/subscribe`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
